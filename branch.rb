@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 # Alex Standke
 #   Aug 2015
@@ -19,6 +19,7 @@ init_pair(COLOR_BLUE, COLOR_BLUE, COLOR_BLACK)
 GIT_BRANCH = `git branch`.split("\n")
 exit 0 if GIT_BRANCH.size == 0
 
+# Reads keypresses from the user including 2 and 3 escape character sequences.
 def read_char
   STDIN.echo = false
   STDIN.raw!
@@ -49,7 +50,16 @@ def find_in_arr(arr, str)
 end
 
 def draw_branches(selected, state, search_str)
+
   setpos(0, 0)
+    case state
+  when :default
+    addstr("q = quit. / = search. m = master. \n")
+  when :search
+    addstr("/#{search_str}\n")
+  end
+  addstr("\n")
+  
   addstr("Pick a branch\n")
 
   branches = GIT_BRANCH.each_with_index.map do |branch, i|
@@ -68,12 +78,8 @@ def draw_branches(selected, state, search_str)
     branch_name
   end
 
-  case state
-  when :default
-    addstr("Use j/k and enter to select. '/' = search. 'm' = master. 'd' = delete. 'D' = force delete.\n")
-  when :search
-    addstr("/#{search_str}\n")
-  end
+  addstr("\n")
+
   refresh
   branches
 end
@@ -112,14 +118,6 @@ loop do
     when 'm'
       close_screen
       `git checkout master`
-      exit 0
-    when 'd'
-      close_screen
-      `git branch -d #{branches[selected]}`
-      exit 0
-    when 'D'
-      close_screen
-      `git branch -D #{branches[selected]}`
       exit 0
     when "\e", "\u0003", 'q'
       close_screen
